@@ -1,0 +1,28 @@
+{
+  "projects": [
+    {
+      "name": "Customer Portal Refresh",
+      "owner": "Mona Patel",
+      "status": "In progress",
+      "recentActivity": "The account settings flow entered review; feedback is due Thursday.",
+      "priority": "High",
+      "summary": "Frontend contributors can pick up responsive settings-page polish and accessibility review."
+    },
+    {
+      "name": "Analytics Event Cleanup",
+      "owner": "Jordan Lee",
+      "status": "On track",
+      "recentActivity": "The team verified the new event naming map against staging data.",
+      "priority": "Medium",
+      "summary": "Backend and data contributors are coordinating the final event migration."
+    },
+    {
+      "name": "Help Center Search",
+      "owner": "Avery Chen",
+      "status": "At risk",
+      "recentActivity": "Search relevance testing surfaced gaps in the synonym list.",
+      "priority": "High",
+      "summary": "A contributor familiar with content indexing can help review synonyms and test edge cases."
+    }
+  ]
+}

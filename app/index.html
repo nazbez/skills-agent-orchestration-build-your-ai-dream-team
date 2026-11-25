@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <p class="eyebrow">Team overview</p>
+        <h1>Project Pulse</h1>
+        <p>A quick view of project progress, priorities, and the people moving work forward.</p>
+      </header>
+
+      <section aria-labelledby="projects-heading">
+        <div class="section-heading">
+          <h2 id="projects-heading">Projects</h2>
+          <p id="load-status" role="status" aria-live="polite">Loading projects…</p>
+        </div>
+        <div id="project-grid" class="project-grid" aria-busy="true"></div>
+      </section>
+    </main>
+
+    <script>
+      const statusMessage = document.querySelector("#load-status");
+      const projectGrid = document.querySelector("#project-grid");
+
+      function makeTextElement(tagName, className, text) {
+        const element = document.createElement(tagName);
+        element.className = className;
+        element.textContent = text;
+        return element;
+      }
+
+      function isProject(project) {
+        const requiredFields = ["name", "owner", "status", "recentActivity", "priority"];
+        return project !== null
+          && typeof project === "object"
+          && requiredFields.every((field) =>
+            typeof project[field] === "string" && project[field].trim().length > 0
+          )
+          && (project.summary === undefined || typeof project.summary === "string");
+      }
+
+      function renderProject(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const heading = makeTextElement("h3", "project-name", project.name);
+        const meta = document.createElement("div");
+        meta.className = "project-meta";
+        const statusBadge = makeTextElement("span", "status-badge", project.status);
+        statusBadge.dataset.status = project.status.trim().toLowerCase();
+        const priorityBadge = makeTextElement("span", "priority-badge", project.priority);
+        priorityBadge.dataset.priority = project.priority.trim().toLowerCase();
+        meta.append(
+          statusBadge,
+          priorityBadge,
+          makeTextElement("p", "project-owner", `Owner: ${project.owner}`)
+        );
+
+        const activity = document.createElement("p");
+        activity.className = "recent-activity";
+        activity.append(
+          makeTextElement("strong", "", "Recent activity: "),
+          document.createTextNode(project.recentActivity)
+        );
+
+        card.append(heading, meta, activity);
+        if (project.summary && project.summary.trim()) {
+          card.append(makeTextElement("p", "project-summary", project.summary));
+        }
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("./project-data.json");
+          if (!response.ok) {
+            throw new Error(`Project data request failed (${response.status}).`);
+          }
+
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects) || !data.projects.every(isProject)) {
+            throw new Error("Project data is not in the expected format.");
+          }
+
+          if (data.projects.length === 0) {
+            statusMessage.textContent = "No projects are available right now.";
+            return;
+          }
+
+          const cards = data.projects.map(renderProject);
+          projectGrid.replaceChildren(...cards);
+          statusMessage.textContent = `Showing ${cards.length} ${cards.length === 1 ? "project" : "projects"}.`;
+        } catch (error) {
+          statusMessage.textContent = `Unable to load projects. ${error.message}`;
+        } finally {
+          projectGrid.setAttribute("aria-busy", "false");
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>
